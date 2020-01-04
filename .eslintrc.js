@@ -9,6 +9,8 @@ module.exports = {
     '@vue/typescript'
   ],
   rules: {
+		"indent": [2, "tab"],
+    "no-tabs": 0,
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off'
   },
