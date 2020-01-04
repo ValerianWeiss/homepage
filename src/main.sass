@@ -1,4 +1,7 @@
-@import 'https://fonts.googleapis.com/css?family=Ubuntu:300,500&display=swap'
+@import url('https://fonts.googleapis.com/css?family=Ubuntu:300,500&display=swap')
+
+$background-dark: #1E1E1E
+$font-bright: #CCCCCC
 
 %ubuntu500
   font-family: Ubuntu
@@ -8,15 +11,29 @@
   font-family: Ubuntu
   font-weight: 400
 
+  
+body
+  margin: 0
+  padding: 0
+  background-color: $background-dark
+
 h1
   @extend %ubuntu500
   font-size: 48px
-  margin: 10px
+  margin: 0
 
 h4
   @extend %ubuntu400
   font-size: 16px
-  margin: 5px
+  margin: 0
+
+.h1-bright
+  @extend h1
+  color: $font-bright
+
+.h4-bright
+  @extend h4
+  color: $font-bright
 
 .center
   display: flex
