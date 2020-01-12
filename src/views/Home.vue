@@ -22,5 +22,7 @@ export default class Home extends Vue {
 </script>
 
 <style lang="sass" scoped>
-
+.home
+  margin: 0
+  padding: 0
 </style>
