@@ -1,7 +1,7 @@
 <template>
-  <div class="loading">
-    <div id="content">
-      <div id="loading-icon-wrapper">
+  <div class="loading-container margin-padding-0">
+    <div id="content-container">
+      <div id="loading-icon-container">
         <h1 class="h1-bright">L</h1>
       </div>
       <div id="loading-bar">
@@ -11,11 +11,27 @@
             v-bind:style="{width: this.loadingBarProgressSize + 'px'}">
           </div>
         </div>
-        <div id="percentage-wrapper">
+        <div id="percentage-container">
           <h4
             id="loading-percentage"
             class="h4-bright">
             {{this.loadingPercentage * 100}}%
+          </h4>
+        </div>
+      </div>
+      <div id="down-container" class="center">
+        <svg class="height-80 width-100" viewbox="0 0 100 100" preserveAspectRatio="none">
+          <line x1="50%" y1="0%" x2="50%" y2="3%" stroke="white" />
+          <line x1="50%" y1="7%" x2="50%" y2="12%" stroke="white" />
+          <line x1="50%" y1="16%" x2="50%" y2="95%" stroke="white" />
+          <ellipse cx="50%" cy="95%" rx="5" ry="5" style="fill: white"/>
+          <ellipse cx="50%" cy="50%" rx="3" ry="3" style="fill: white"/>
+        </svg>
+        <div class="center-flex height-20">
+          <h4 class="h4-bright-light">
+            <span class="side-margin-10">──</span>
+            scroll or press down
+            <span class="side-margin-10">──</span>
           </h4>
         </div>
       </div>
@@ -35,7 +51,7 @@ export default class Loading extends Vue {
 
   public constructor() {
     super()
-    this.loadingPercentage = 0.9
+    this.loadingPercentage = 0.5
     this.loadingBarPlainElement = null
   }
 
@@ -48,6 +64,10 @@ export default class Loading extends Vue {
       ? this.loadingBarPlainElement.clientWidth * this.loadingPercentage
       : 0
   }
+
+  private get isReady(): boolean {
+    return this.loadingPercentage === 1
+  }
 }
 </script>
 
@@ -55,20 +75,18 @@ export default class Loading extends Vue {
 h1
   text-align: center
 
-.loading
-  margin: 0
-  padding: 0
+.loading-container
   height: 100vh
   width: 100vw
 
-#content
+#content-container
   position: absolute
-  height: 200px
-  width: 500px
+  height: 25vh
+  width: 25vw
   margin-top: calc(50vh - 150px)
-  margin-left: calc(50vw - 250px)
+  margin-left: calc(50vw - 12.5vw)
 
-#loading-icon-wrapper
+#loading-icon-container
   height: 100px
   width: 100px
   margin: auto
@@ -78,7 +96,7 @@ h1
   border-radius: 2px
 
 #loading-bar-plain
-  width: 400px
+  width: 100%
   background-color: rgba(255, 255, 255, .5)
   margin: 20px auto 15px auto
 
@@ -89,6 +107,12 @@ h1
 
 #loading-percentage
   text-align: center
+
+#down-container
+  position: absolute
+  height: 25vh
+  width: 100%
+  top: 35vh
 
 @keyframes loadingBarGradient
   0%
