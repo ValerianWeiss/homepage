@@ -15,7 +15,8 @@
 		"vue-class-component": "^7.0.2",
 		"vue-property-decorator": "^8.3.0",
 		"vue-router": "^3.1.3",
-		"vuex": "^3.1.2"
+		"vuex": "^3.1.2",
+		"three": "^0.113.2"
 	},
 	"devDependencies": {
 		"@types/jest": "^24.0.19",
@@ -35,7 +36,7 @@
 		"geckodriver": "^1.19.1",
 		"node-sass": "^4.12.0",
 		"sass-loader": "^8.0.0",
-		"typescript": "~3.5.3",
+		"typescript": "^3.5.3",
 		"vue-template-compiler": "^2.6.10"
 	}
 }

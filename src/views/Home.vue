@@ -1,6 +1,6 @@
 <template>
   <div class="home">
-    <loading v-if="this.isLoading()"></loading>
+    <loading v-if="this.isLoading"></loading>
   </div>
 </template>
 
@@ -15,7 +15,7 @@ import '@/main.sass'
   components: { Loading }
 })
 export default class Home extends Vue {
-  isLoading() {
+  private get isLoading(): boolean {
     return true
   }
 }

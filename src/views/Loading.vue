@@ -2,7 +2,7 @@
   <div class="width-height-100 margin-padding-0">
     <div id="content-container">
       <div id="loading-icon-container">
-        <h1 class="h1-bright">L</h1>
+        <crystal class="width-height-100"></crystal>
       </div>
       <div id="loading-bar">
         <div id="loading-bar-plain" class="loading-bar">
@@ -19,7 +19,7 @@
           </h4>
         </div>
       </div>
-      <div id="down-container" class="center">
+      <div id="swipe-up-container" class="center" v-if="this.isReady">
         <svg class="height-80 width-100" viewbox="0 0 100 100" preserveAspectRatio="none">
           <ellipse id="scroll-ellipse" cx="50%" cy="80%" rx="5" ry="5" style="fill: white" />
           <ellipse cx="50%" cy="5%" rx="5" ry="5" style="fill: white" />
@@ -42,20 +42,24 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
+import Crystal from '../components/Crystal.vue'
 import '@/main.sass'
 
-@Component({ name: 'loading' })
+@Component({
+  name: 'loading',
+  components: { Crystal }
+})
 export default class Loading extends Vue {
   private loadingPercentage: number
   private loadingBarPlainElement: Element | null
 
   public constructor() {
     super()
-    this.loadingPercentage = 0.5
+    this.loadingPercentage = 1
     this.loadingBarPlainElement = null
   }
 
-  private mounted() {
+  private mounted(): void {
     this.loadingBarPlainElement = document.querySelector('#loading-bar-plain')
   }
 
@@ -77,22 +81,22 @@ h1
 
 #content-container
   position: absolute
-  margin-top: calc(50vh - 150px)
+  margin-top: 25vh
   margin-left: calc(50vw - 12.5vw)
-  height: calc(50vh + 150px)
+  height: 75vh
   width: 25vw
 
 #loading-icon-container
-  height: 100px
-  width: 100px
   margin: auto
+  width: 300px
+  height: 300px
 
 .loading-bar
   height: 2px
   border-radius: 2px
 
 #loading-bar-plain
-  margin: 20px auto 15px auto
+  margin: 0 auto 15px auto
   width: 100%
   background-color: rgba(255, 255, 255, .5)
 
@@ -104,7 +108,7 @@ h1
 #loading-percentage
   text-align: center
 
-#down-container
+#swipe-up-container
   position: absolute
   height: 25vh
   width: 100%
@@ -115,9 +119,9 @@ h1
 
 @media screen and (max-width: 720px)
   #content-container
-    margin-left: 10vw
-    margin-right: 10vw
+    margin: 15vh 10vw 0 10vw
     width: 80vw
+    height: 85vh
 
 @keyframes loadingBarGradient
   0%
