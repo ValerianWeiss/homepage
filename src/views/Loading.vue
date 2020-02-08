@@ -1,5 +1,5 @@
 <template>
-  <div class="loading-container margin-padding-0">
+  <div class="width-height-100 margin-padding-0">
     <div id="content-container">
       <div id="loading-icon-container">
         <h1 class="h1-bright">L</h1>
@@ -21,16 +21,16 @@
       </div>
       <div id="down-container" class="center">
         <svg class="height-80 width-100" viewbox="0 0 100 100" preserveAspectRatio="none">
-          <line x1="50%" y1="0%" x2="50%" y2="3%" stroke="white" />
-          <line x1="50%" y1="7%" x2="50%" y2="12%" stroke="white" />
-          <line x1="50%" y1="16%" x2="50%" y2="95%" stroke="white" />
-          <ellipse cx="50%" cy="95%" rx="5" ry="5" style="fill: white"/>
-          <ellipse cx="50%" cy="50%" rx="3" ry="3" style="fill: white"/>
+          <ellipse id="scroll-ellipse" cx="50%" cy="80%" rx="5" ry="5" style="fill: white" />
+          <ellipse cx="50%" cy="5%" rx="5" ry="5" style="fill: white" />
+          <line x1="50%" y1="80%" x2="50%" y2="5%" stroke="white" />
+          <line x1="50%" y1="92%" x2="50%" y2="85%" stroke="white" />
+          <line x1="50%" y1="100%" x2="50%" y2="97%" stroke="white" />
         </svg>
         <div class="center-flex height-20">
           <h4 class="h4-bright-light">
             <span class="side-margin-10">──</span>
-            scroll or press down
+            scroll or swipe up
             <span class="side-margin-10">──</span>
           </h4>
         </div>
@@ -75,16 +75,12 @@ export default class Loading extends Vue {
 h1
   text-align: center
 
-.loading-container
-  height: 100vh
-  width: 100vw
-
 #content-container
   position: absolute
-  height: 25vh
-  width: 25vw
   margin-top: calc(50vh - 150px)
   margin-left: calc(50vw - 12.5vw)
+  height: calc(50vh + 150px)
+  width: 25vw
 
 #loading-icon-container
   height: 100px
@@ -96,9 +92,9 @@ h1
   border-radius: 2px
 
 #loading-bar-plain
+  margin: 20px auto 15px auto
   width: 100%
   background-color: rgba(255, 255, 255, .5)
-  margin: 20px auto 15px auto
 
 #loading-bar-progress
   background: linear-gradient(270deg, #4eff00, #B4FFA1, #4eff00)
@@ -112,7 +108,16 @@ h1
   position: absolute
   height: 25vh
   width: 100%
-  top: 35vh
+  bottom: 10px
+
+#scroll-ellipse
+  animation: scrollUp 2s ease infinite
+
+@media screen and (max-width: 720px)
+  #content-container
+    margin-left: 10vw
+    margin-right: 10vw
+    width: 80vw
 
 @keyframes loadingBarGradient
   0%
@@ -122,4 +127,9 @@ h1
   100%
     background-position: 100% 50%
 
+@keyframes scrollUp
+  0%
+    transform: translate(50%, 80%) scale(0)
+  100%
+    transform: translate(0%, -75%) scale(1)
 </style>
