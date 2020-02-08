@@ -41,23 +41,22 @@ export default class Crystal extends Vue {
     this.scene = new Scene()
     this.camera = new PerspectiveCamera(90, 1, 0.1, 1000)
     this.renderer = new WebGLRenderer({ alpha: true })
-
     let elements = document.getElementsByClassName('crystal')
-    let element = elements.item(0)
 
-    if (elements.length === 1 && element != null) {
-      element.appendChild(this.renderer.domElement)
-      let sketchWidth = element.clientWidth
-      let sketchHeight = element.clientHeight
-      this.renderer.setSize(sketchWidth, sketchHeight)
-      this.crystal = this.createCrystal()
-      this.setRotation([this.crystal], Math.PI / 3, 0, 0)
-      this.setPosition([this.crystal], 0, 0, -2)
-      let lights = this.createLights(this.crystal)
-      let objects = [this.crystal, ...lights]
-      this.addToScene(objects, this.scene)
-    } else {
-      throw new Error('More or none entrypoints for sketch')
+    for (let i = 0; i < elements.length; i++) {
+      let element = elements.item(0)
+      if (element != null) {
+        element.appendChild(this.renderer.domElement)
+        let sketchWidth = element.clientWidth
+        let sketchHeight = element.clientHeight
+        this.renderer.setSize(sketchWidth, sketchHeight)
+        this.crystal = this.createCrystal()
+        this.setRotation([this.crystal], Math.PI / 3, 0, 0)
+        this.setPosition([this.crystal], 0, 0, -2)
+        let lights = this.createLights(this.crystal)
+        let objects = [this.crystal, ...lights]
+        this.addToScene(objects, this.scene)
+      }
     }
   }
 
