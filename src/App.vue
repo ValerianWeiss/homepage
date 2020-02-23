@@ -1,5 +1,6 @@
 <template>
-  <div id="app">
+  <div class="app">
+    <navbar></navbar>
     <home></home>
   </div>
 </template>
@@ -8,7 +9,8 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import Home from '@/views/Home.vue'
+import Navbar from '@/components/Navbar.vue'
 
-@Component({ components: { Home } })
+@Component({ components: { Home, Navbar } })
 export default class App extends Vue {}
 </script>
