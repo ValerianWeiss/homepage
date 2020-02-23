@@ -13,22 +13,21 @@
         </div>
         <div id="percentage-container">
           <h4
-            id="loading-percentage"
-            class="h4-bright">
+            id="loading-percentage">
             {{this.loadingPercentage * 100}}%
           </h4>
         </div>
       </div>
       <div id="swipe-up-container" class="center" v-if="this.isReady">
         <svg class="height-80 width-100" viewbox="0 0 100 100" preserveAspectRatio="none">
-          <ellipse id="scroll-ellipse" cx="50%" cy="80%" rx="5" ry="5" style="fill: white" />
-          <ellipse cx="50%" cy="5%" rx="5" ry="5" style="fill: white" />
-          <line x1="50%" y1="80%" x2="50%" y2="5%" stroke="white" />
-          <line x1="50%" y1="92%" x2="50%" y2="85%" stroke="white" />
-          <line x1="50%" y1="100%" x2="50%" y2="97%" stroke="white" />
+          <ellipse id="scroll-ellipse" cx="50%" cy="80%" rx="5" ry="5" style="fill: black" />
+          <ellipse cx="50%" cy="5%" rx="5" ry="5" style="fill: black" />
+          <line x1="50%" y1="80%" x2="50%" y2="5%" stroke="black" />
+          <line x1="50%" y1="92%" x2="50%" y2="85%" stroke="black" />
+          <line x1="50%" y1="100%" x2="50%" y2="97%" stroke="black" />
         </svg>
         <div class="center-flex height-20">
-          <h4 class="h4-bright-light">
+          <h4 class="heading-light">
             <span class="side-margin-10">──</span>
             scroll or swipe up
             <span class="side-margin-10">──</span>
@@ -76,9 +75,6 @@ export default class Loading extends Vue {
 </script>
 
 <style lang="sass" scoped>
-h1
-  text-align: center
-
 #content-container
   position: absolute
   margin-top: 25vh
@@ -98,12 +94,10 @@ h1
 #loading-bar-plain
   margin: 0 auto 15px auto
   width: 100%
-  background-color: rgba(255, 255, 255, .5)
+  background-color: rgba(0, 0, 0, .5)
 
 #loading-bar-progress
-  background: linear-gradient(270deg, #4eff00, #B4FFA1, #4eff00)
-  background-size: 900% 900%
-  animation: loadingBarGradient 2s ease infinite
+  background: #4eff00
 
 #loading-percentage
   text-align: center
@@ -122,14 +116,6 @@ h1
     margin: 15vh 10vw 0 10vw
     width: 80vw
     height: 85vh
-
-@keyframes loadingBarGradient
-  0%
-    background-position: 0% 50%
-  50%
-    background-position: 100% 50%
-  100%
-    background-position: 100% 50%
 
 @keyframes scrollUp
   0%
