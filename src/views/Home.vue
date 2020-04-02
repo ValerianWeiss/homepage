@@ -1,9 +1,7 @@
 <template>
   <div class="home">
     <loading v-if="this.isLoading"></loading>
-    <div class="content center-flex">
-      <portfolio class="width-height-100"></portfolio>
-    </div>
+    <portfolio></portfolio>
   </div>
 </template>
 
@@ -28,6 +26,7 @@ export default class Home extends Vue {
 
 <style lang="sass" scoped>
 .home
+  height: calc(100vh - 60px)
   margin: 0
   padding: 0 10% 0 10%
 </style>

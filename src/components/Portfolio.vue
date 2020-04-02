@@ -1,10 +1,12 @@
 <template>
   <div class="portfolio">
     <div
+      class="item"
       v-for="artwork in this.artworks"
       :key="artwork.title">
-      <protfolio-item class="image" :artwork="artwork"></protfolio-item>
+      <protfolio-item :artwork="artwork"></protfolio-item>
     </div>
+    <item-selector></item-selector>
   </div>
 </template>
 
@@ -12,12 +14,13 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import ProtfolioItem from '@/components/PortfolioItem.vue'
+import ItemSelector from '@/components/ItemSelector.vue'
 import artworks from '@/misc/artworks'
 import Artwork from '@/misc/Artwork'
 
 @Component({
   name: 'protfolio',
-  components: { ProtfolioItem }
+  components: { ProtfolioItem, ItemSelector }
 })
 export default class Portfolio extends Vue {
   private artworks: Artwork[]
@@ -30,7 +33,10 @@ export default class Portfolio extends Vue {
 </script>
 
 <style lang="sass" scoped>
-.image
-  width: 33.33%
-  height: auto
+.portfolio
+  height: 100%
+
+.item
+  width: 100%
+  height: 80%
 </style>
