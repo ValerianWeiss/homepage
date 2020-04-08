@@ -1,14 +1,16 @@
 <template>
-  <div id="app">
-    <hello-world></hello-world>
+  <div class="app">
+    <navbar></navbar>
+    <home></home>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component'
-import HelloWorld from '@/components/HelloWorld.vue'
+import Home from '@/views/Home.vue'
+import Navbar from '@/components/Navbar.vue'
 
-@Component({ components: { HelloWorld } })
+@Component({ components: { Home, Navbar } })
 export default class App extends Vue {}
 </script>
