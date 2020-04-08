@@ -6,11 +6,17 @@
     <div class="image-container float-left">
       <img
         class="image width-height-100"
-        :src="require(`@/assets${this.artwork.previewImgPath}`)"
+        :src="this.artwork.previewImgUrl"
         alt="artwork image"
       >
     </div>
     <div class="text-container">
+      <h2 class="text small-heading">How it was done</h2>
+      <p class=text>
+        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ut tincidunt quam. Morbi volutpat metus vel risus tincidunt hendrerit. Nulla facilisi. In hac habitasse platea dictumst. Suspendisse sagittis, sem id feugiat hendrerit, sapien velit bibendum tellus, nec scelerisque lorem nisi id magna. In vel tellus ultrices elit faucibus ultricies. Etiam hendrerit ullamcorper orci, sit amet ultrices enim cursus quis.
+        Nulla facilisi. Donec euismod at massa non lacinia. Donec in fringilla augue, vel vulputate mi. Praesent eget ipsum eget est condimentum vestibulum. Nulla et maximus mauris. Donec facilisis facilisis diam, sed malesuada erat eleifend quis. In mattis id nisi ac rutrum. Curabitur porta nibh quam, in maximus turpis mattis vel. Morbi in tempor mi, vitae blandit sapien. Aliquam erat volutpat. Quisque facilisis odio massa, eget rutrum est rhoncus id. Vestibulum vulputate magna non iaculis pulvinar. Quisque tempor porttitor dignissim. Integer faucibus maximus ex at tincidunt. Duis metus felis, sollicitudin eget elementum nec, pulvinar sagittis arcu. Nulla vestibulum facilisis erat, nec finibus mi lobortis mollis.
+      </p>
+      <h2 class="text small-heading">Description</h2>
       <p class=text>
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ut tincidunt quam. Morbi volutpat metus vel risus tincidunt hendrerit. Nulla facilisi. In hac habitasse platea dictumst. Suspendisse sagittis, sem id feugiat hendrerit, sapien velit bibendum tellus, nec scelerisque lorem nisi id magna. In vel tellus ultrices elit faucibus ultricies. Etiam hendrerit ullamcorper orci, sit amet ultrices enim cursus quis.
         Nulla facilisi. Donec euismod at massa non lacinia. Donec in fringilla augue, vel vulputate mi. Praesent eget ipsum eget est condimentum vestibulum. Nulla et maximus mauris. Donec facilisis facilisis diam, sed malesuada erat eleifend quis. In mattis id nisi ac rutrum. Curabitur porta nibh quam, in maximus turpis mattis vel. Morbi in tempor mi, vitae blandit sapien. Aliquam erat volutpat. Quisque facilisis odio massa, eget rutrum est rhoncus id. Vestibulum vulputate magna non iaculis pulvinar. Quisque tempor porttitor dignissim. Integer faucibus maximus ex at tincidunt. Duis metus felis, sollicitudin eget elementum nec, pulvinar sagittis arcu. Nulla vestibulum facilisis erat, nec finibus mi lobortis mollis.
@@ -40,7 +46,7 @@ export default class PortfolioItem extends Vue {
   margin-bottom: 30px
 
 .image-container
-  width: 50%
+  width: 40%
   height: calc(100% - 110px)
 
 .image
@@ -48,9 +54,14 @@ export default class PortfolioItem extends Vue {
   object-position: 0 0
 
 .text-container
-  width: 50%
+  height: calc(100% - 110px)
+  width: 60%
   float: left
+  overflow-y: auto
 
 .text
-  margin: 0 25px 0 25px
+  margin: 0 25px 15px 25px
+
+.small-heading
+  margin: 0px 25px 5px 25px
 </style>

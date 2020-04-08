@@ -8,11 +8,11 @@ $font-bright: #CCCCCC
 
 %ubuntu500
   font-family: Ubuntu
-  font-weight: 400
+  font-weight: 500
 
-%ubuntu400
+%ubuntu300
   font-family: Ubuntu
-  font-weight: 400
+  font-weight: 300
 
 body, .app
   @extend .margin-padding-0
@@ -25,11 +25,20 @@ h1
   color: $font-dark
 
 h4
-  @extend %ubuntu400
+  @extend %ubuntu500
   font-size: 16px
   margin: 0
   user-select: none
   color: $font-dark
+
+p
+  @extend %ubuntu300
+
+span
+  user-select: none
+
+img
+  user-select: none
 
 .heading-light
   font-style: italic
@@ -67,3 +76,6 @@ h4
 
 .float-left
   float: left
+
+.float-right
+  float-right
