@@ -51,8 +51,11 @@ export default class ItemSelector extends Vue {
   public activeItem: SelectableItem
 
   private imageWrappers: ImageWrapper[] = []
-  private readonly contentAreaRef: string = 'content-area'
   private isContentAreaInizialized: boolean = false
+  private animationQueue: Promise<void>[] = []
+  private readonly contentAreaRef: string = 'content-area'
+  private readonly animationDuration: number = 500
+  private readonly imageWrapperSize: number = 100
 
   private mounted(): void {
     this.checkIfPropsAreValid()
@@ -114,7 +117,7 @@ export default class ItemSelector extends Vue {
 
   private setStylingForImageWrapper(element: any, position: number): void {
     let leftMargin = this.calcImageWrapperLeftMargin(position)
-    let size = this.calcImageWrapperSize(position, 100)
+    let size = this.calcImageWrapperSize(position, this.imageWrapperSize)
 
     element.style.position = 'absolute'
     element.style.width = `${size}px`
@@ -135,16 +138,16 @@ export default class ItemSelector extends Vue {
     return 100 / (this.displayItemCount + 1) * (position + 1)
   }
 
-  private calcImageWrapperSize(position: number, fullSize: number, progress?: number, direction?: Direction): number {
+  private calcImageWrapperSize(position: number, progress?: number, direction?: Direction): number {
     let size
 
     if (!this.isContentAreaInizialized) {
-      size = this.calcImageWrapperSizeForPosition(position, 100)
+      size = this.calcImageWrapperSizeForPosition(position, this.imageWrapperSize)
     } else if (this.isContentAreaInizialized && progress !== undefined && direction !== undefined) {
       let distFactor = this.easeInOutQuad(progress)
       let directionFactor = this.getDirectionFactor(direction)
-      let currentSize = this.calcImageWrapperSizeForPosition(position, 100, direction)
-      let newSize = this.calcImageWrapperSizeForPosition(position + directionFactor, 100, direction)
+      let currentSize = this.calcImageWrapperSizeForPosition(position, direction)
+      let newSize = this.calcImageWrapperSizeForPosition(position + directionFactor, direction)
 
       size = currentSize + (newSize - currentSize) * distFactor
 
@@ -165,46 +168,53 @@ export default class ItemSelector extends Vue {
     return size === undefined ? 0 : size
   }
 
-  private calcImageWrapperSizeForPosition = (position: number, fullSize: number, direction?: Direction): number => {
+  private calcImageWrapperSizeForPosition = (position: number, direction?: Direction): number => {
     let centerPos = Math.floor(this.displayItemCount / 2) + 1
     let itemPos = direction === Direction.FORWARD ? position : position + 1
     let dist = Math.abs(centerPos - itemPos)
-    return Math.floor(fullSize - Math.pow(dist * 2, 2))
+    return Math.floor(this.imageWrapperSize - Math.pow(dist * 2, 2))
   }
 
-  private selectItem(direction: Direction): void {
-    let duration = 1000
-    let startTime = new Date().getTime()
-    let directionFactor = this.getDirectionFactor(direction)
-    let removedItem = false
+  private selectItem(direction: Direction): Promise<void> {
+    let animationPromise = new Promise<void>(resolve => {
+      Promise.all(this.animationQueue).then(() => {
+        let startTime = new Date().getTime()
+        let directionFactor = this.getDirectionFactor(direction)
 
-    this.addNewImageWrapper(direction)
+        this.addNewImageWrapper(direction)
 
-    let animationInterval = setInterval(() => {
-      let ellapsedTime = new Date().getTime() - startTime
-      let progress = ellapsedTime < duration ? ellapsedTime / duration : 1
-      let distFactor = this.easeInOutQuad(progress)
-      let totalDist = directionFactor * this.calcImageWrapperLeftMargin(0)
+        let animationInterval = setInterval(() => {
+          let ellapsedTime = new Date().getTime() - startTime
+          let progress = ellapsedTime < this.animationDuration ? ellapsedTime / this.animationDuration : 1
+          let distFactor = this.easeInOutQuad(progress)
+          let totalDist = directionFactor * this.calcImageWrapperLeftMargin(0)
 
-      this.imageWrappers.forEach(imageWrapper => {
-        let position = imageWrapper.position
-        let size = this.calcImageWrapperSize(position, 100, progress, direction)
+          this.imageWrappers.forEach(imageWrapper => {
+            let position = imageWrapper.position
+            let size = this.calcImageWrapperSize(position, progress, direction)
 
-        let leftMargin = direction === Direction.FORWARD
-          ? this.calcImageWrapperLeftMargin(position) + distFactor * totalDist - totalDist
-          : this.calcImageWrapperLeftMargin(position) + distFactor * totalDist
-        let element = imageWrapper.element
+            let leftMargin = direction === Direction.FORWARD
+              ? this.calcImageWrapperLeftMargin(position) + distFactor * totalDist - totalDist
+              : this.calcImageWrapperLeftMargin(position) + distFactor * totalDist
+            let element = imageWrapper.element
 
-        element.style.width = `${size}px`
-        element.style.height = `${size}px`
-        element.style.left = `calc(${leftMargin}% - ${size / 2}px)`
+            element.style.width = `${size}px`
+            element.style.height = `${size}px`
+            element.style.left = `calc(${leftMargin}% - ${size / 2}px)`
+          })
+
+          if (progress === 1) {
+            direction === Direction.FORWARD ? this.removeLastImageWrapper() : this.removeFirstImageWrapper()
+            clearInterval(animationInterval)
+            let animationIndex = this.animationQueue.indexOf(animationPromise)
+            resolve()
+            this.animationQueue.splice(animationIndex, 1)
+          }
+        }, 1000 / 60)
       })
-
-      if (progress === 1) {
-        direction === Direction.FORWARD ? this.removeLastImageWrapper() : this.removeFirstImageWrapper()
-        clearInterval(animationInterval)
-      }
-    }, 1000 / 60)
+    })
+    this.animationQueue.push(animationPromise)
+    return animationPromise
   }
 
   private getDirectionFactor(direction: Direction): number {
@@ -220,8 +230,7 @@ export default class ItemSelector extends Vue {
   private addNewImageWrapperAsFirst(): void {
     let itemIndexOfFirstItem = this.imageWrappers[0].itemIndex
     let itemIndexOfNewItem = itemIndexOfFirstItem - 1 < 0
-      ? this.items.length - 1
-      : itemIndexOfFirstItem - 1
+      ? this.items.length - 1 : itemIndexOfFirstItem - 1
 
     let newItem = this.items[itemIndexOfNewItem]
     let newImageWrapper = this.createImageWrapper(Side.FRONT, newItem)
@@ -230,7 +239,9 @@ export default class ItemSelector extends Vue {
 
   private addNewImageWrapperAsLast(): void {
     let itemIndexOfLastItem = this.imageWrappers[this.imageWrappers.length - 1].itemIndex
-    let itemIndexOfNewItem = (itemIndexOfLastItem + 1) % (this.imageWrappers.length - 1)
+    let itemIndexOfNewItem = itemIndexOfLastItem + 1 === this.items.length
+      ? 0 : itemIndexOfLastItem + 1
+
     let newItem = this.items[itemIndexOfNewItem]
     let newImageWrapper = this.createImageWrapper(Side.END, newItem)
     this.imageWrappers.push(newImageWrapper)
