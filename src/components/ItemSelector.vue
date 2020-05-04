@@ -20,6 +20,24 @@
 import Vue from 'vue'
 import { Component, Prop } from 'vue-property-decorator'
 import SelectableItem from '@/misc/SelectableItem'
+import { throwVariableIsUndefinedError } from '@/misc/errors'
+
+interface ImageWrapper {
+  element: HTMLDivElement,
+  position: number
+  itemIndex: number
+  previewImgUrl: string
+}
+
+enum Direction {
+  FORWARD,
+  BACKWARDS
+}
+
+enum Side {
+  FRONT,
+  END
+}
 
 @Component({ name: 'item-selector' })
 export default class ItemSelector extends Vue {
@@ -32,13 +50,14 @@ export default class ItemSelector extends Vue {
   @Prop()
   public activeItem: SelectableItem
 
-  private itemIndiciesToDisplay: number[] = []
-  private contentAreaRef: string = 'content-area'
+  private imageWrappers: ImageWrapper[] = []
+  private readonly contentAreaRef: string = 'content-area'
+  private isContentAreaInizialized: boolean = false
 
   private mounted(): void {
     this.checkIfPropsAreValid()
-    this.initItemIndiciesToDisplay()
     this.initContentArea()
+    this.isContentAreaInizialized = true
   }
 
   private checkIfPropsAreValid(): void {
@@ -49,31 +68,54 @@ export default class ItemSelector extends Vue {
     }
   }
 
-  private initItemIndiciesToDisplay(): void {
+  private initContentArea(): void {
+    let itemIndiciesToDisplay = []
     let startIndex = Math.floor((this.items.length - this.displayItemCount) / 2)
 
     for (let i = 0; i < this.displayItemCount; i++) {
-      this.itemIndiciesToDisplay.push(startIndex + i)
+      itemIndiciesToDisplay.push(startIndex + i)
     }
-  }
-
-  private initContentArea(): void {
-    // Just the Element case is getting handled here. The type is getting ingnored
-    let contentArea: any = this.$refs[this.contentAreaRef]
 
     for (let i = 0; i < this.displayItemCount; i++) {
-      let imageWrapper = document.createElement('div')
-      let image = document.createElement('img')
-      this.setStylingForImageWrapper(imageWrapper, i)
-      this.setStylingForImage(image, i)
-      imageWrapper.appendChild(image)
-      contentArea.appendChild(imageWrapper)
+      let itemIndex = itemIndiciesToDisplay[i]
+      let imageWrapper = this.createImageWrapper(Side.END, this.items[itemIndex])
+      this.imageWrappers.push(imageWrapper)
     }
   }
 
-  private setStylingForImageWrapper(element: any, index: number): void {
-    let leftMargin = 100 / (this.displayItemCount + 1) * (index + 1)
-    let size = this.calcImageWrapperSize(index, 100)
+  private createImageWrapper(side: Side, item: SelectableItem): ImageWrapper {
+    let position = this.getPositionForNewItem(side)
+    let element = document.createElement('div')
+    let image = document.createElement('img')
+    this.setStylingForImageWrapper(element, position)
+    this.setStylingForImage(image, position, item)
+    element.appendChild(image)
+    this.getContentArea().appendChild(element)
+
+    return {
+      element,
+      position,
+      itemIndex: this.items.indexOf(item),
+      previewImgUrl: item.previewImgUrl
+    }
+  }
+
+  private getPositionForNewItem(side: Side): number {
+    if (side === Side.FRONT) {
+      this.incrementImageWrapperPositions()
+      return 0
+    }
+    return this.imageWrappers.length
+  }
+
+  private getContentArea(): any {
+    return this.$refs[this.contentAreaRef]
+  }
+
+  private setStylingForImageWrapper(element: any, position: number): void {
+    let leftMargin = this.calcImageWrapperLeftMargin(position)
+    let size = this.calcImageWrapperSize(position, 100)
+
     element.style.position = 'absolute'
     element.style.width = `${size}px`
     element.style.height = `${size}px`
@@ -82,32 +124,167 @@ export default class ItemSelector extends Vue {
     element.style.left = `calc(${leftMargin}% - ${size / 2}px)`
   }
 
-  private calcImageWrapperSize(index: number, fullSize: number): number {
-    let centerPos = Math.floor(this.displayItemCount / 2) + 1
-    let itemPos = index + 1
-    let dist = Math.abs(centerPos - itemPos)
-    return Math.floor(fullSize - Math.pow(dist * 2, 2))
-  }
-
-  private setStylingForImage(element: any, index: number): void {
+  private setStylingForImage(element: any, index: number, item: SelectableItem): void {
     element.style.objectFit = 'contain'
-    element.src = this.items[this.itemIndiciesToDisplay[index]].previewImgUrl
+    element.src = item.previewImgUrl
     element.style.width = '100%'
     element.style.height = '100%'
   }
 
-  public onNext(): void {
-    this.itemIndiciesToDisplay.forEach((index, i) => {
-      this.itemIndiciesToDisplay[i] = index + 1 === this.items.length
-        ? 0 : index + 1
+  private calcImageWrapperLeftMargin(position: number): number {
+    return 100 / (this.displayItemCount + 1) * (position + 1)
+  }
+
+  private calcImageWrapperSize(position: number, fullSize: number, progress?: number, direction?: Direction): number {
+    let size
+
+    if (!this.isContentAreaInizialized) {
+      size = this.calcImageWrapperSizeForPosition(position, 100)
+    } else if (this.isContentAreaInizialized && progress !== undefined && direction !== undefined) {
+      let distFactor = this.easeInOutQuad(progress)
+      let directionFactor = this.getDirectionFactor(direction)
+      let currentSize = this.calcImageWrapperSizeForPosition(position, 100, direction)
+      let newSize = this.calcImageWrapperSizeForPosition(position + directionFactor, 100, direction)
+
+      size = currentSize + (newSize - currentSize) * distFactor
+
+      if (position === 0) {
+        if (progress > 0.5) {
+          size = direction === Direction.FORWARD ? size : 0
+        } else {
+          size = direction === Direction.BACKWARDS ? size : 0
+        }
+      } else if (position === this.imageWrappers.length - 1) {
+        if (progress > 0.5) {
+          size = direction === Direction.BACKWARDS ? size : 0
+        } else {
+          size = direction === Direction.FORWARD ? size : 0
+        }
+      }
+    }
+    return size === undefined ? 0 : size
+  }
+
+  private calcImageWrapperSizeForPosition = (position: number, fullSize: number, direction?: Direction): number => {
+    let centerPos = Math.floor(this.displayItemCount / 2) + 1
+    let itemPos = direction === Direction.FORWARD ? position : position + 1
+    let dist = Math.abs(centerPos - itemPos)
+    return Math.floor(fullSize - Math.pow(dist * 2, 2))
+  }
+
+  private selectItem(direction: Direction): void {
+    let duration = 1000
+    let startTime = new Date().getTime()
+    let directionFactor = this.getDirectionFactor(direction)
+    let removedItem = false
+
+    this.addNewImageWrapper(direction)
+
+    let animationInterval = setInterval(() => {
+      let ellapsedTime = new Date().getTime() - startTime
+      let progress = ellapsedTime < duration ? ellapsedTime / duration : 1
+      let distFactor = this.easeInOutQuad(progress)
+      let totalDist = directionFactor * this.calcImageWrapperLeftMargin(0)
+
+      this.imageWrappers.forEach(imageWrapper => {
+        let position = imageWrapper.position
+        let size = this.calcImageWrapperSize(position, 100, progress, direction)
+
+        let leftMargin = direction === Direction.FORWARD
+          ? this.calcImageWrapperLeftMargin(position) + distFactor * totalDist - totalDist
+          : this.calcImageWrapperLeftMargin(position) + distFactor * totalDist
+        let element = imageWrapper.element
+
+        element.style.width = `${size}px`
+        element.style.height = `${size}px`
+        element.style.left = `calc(${leftMargin}% - ${size / 2}px)`
+      })
+
+      if (progress === 1) {
+        direction === Direction.FORWARD ? this.removeLastImageWrapper() : this.removeFirstImageWrapper()
+        clearInterval(animationInterval)
+      }
+    }, 1000 / 60)
+  }
+
+  private getDirectionFactor(direction: Direction): number {
+    return direction === Direction.FORWARD ? 1 : -1
+  }
+
+  private addNewImageWrapper(direction: Direction) {
+    direction === Direction.FORWARD
+      ? this.addNewImageWrapperAsFirst()
+      : this.addNewImageWrapperAsLast()
+  }
+
+  private addNewImageWrapperAsFirst(): void {
+    let itemIndexOfFirstItem = this.imageWrappers[0].itemIndex
+    let itemIndexOfNewItem = itemIndexOfFirstItem - 1 < 0
+      ? this.items.length - 1
+      : itemIndexOfFirstItem - 1
+
+    let newItem = this.items[itemIndexOfNewItem]
+    let newImageWrapper = this.createImageWrapper(Side.FRONT, newItem)
+    this.imageWrappers.unshift(newImageWrapper)
+  }
+
+  private addNewImageWrapperAsLast(): void {
+    let itemIndexOfLastItem = this.imageWrappers[this.imageWrappers.length - 1].itemIndex
+    let itemIndexOfNewItem = (itemIndexOfLastItem + 1) % (this.imageWrappers.length - 1)
+    let newItem = this.items[itemIndexOfNewItem]
+    let newImageWrapper = this.createImageWrapper(Side.END, newItem)
+    this.imageWrappers.push(newImageWrapper)
+  }
+
+  private removeFirstImageWrapper(): void {
+    let imageWrapper = this.imageWrappers.shift()
+    this.decrementImageWrapperPositions()
+    this.removeImageWrapperFromDom(imageWrapper)
+  }
+
+  private removeLastImageWrapper(): void {
+    let imageWrapper = this.imageWrappers.pop()
+    this.removeImageWrapperFromDom(imageWrapper)
+  }
+
+  private removeImageWrapperFromDom(imageWrapper: ImageWrapper | undefined): void {
+    imageWrapper === undefined
+      ? throwVariableIsUndefinedError()
+      : this.removeDomElement(imageWrapper.element)
+  }
+
+  private incrementImageWrapperPositions(): void {
+    this.imageWrappers.forEach(imageWrapper => {
+      imageWrapper.position += 1
     })
   }
 
-  private onPrivous(): void {
-    this.itemIndiciesToDisplay.forEach((index, i) => {
-      this.itemIndiciesToDisplay[i] = index - 1 < 0
-        ? this.items.length - 1 : index - 1
+  private decrementImageWrapperPositions(): void {
+    this.imageWrappers.forEach(imageWrapper => {
+      imageWrapper.position -= 1
     })
+  }
+
+  private removeDomElement(element: HTMLElement) {
+    element.parentNode != null
+      ? element.parentNode.removeChild(element)
+      : console.warn('removeDomElement failed. Element could not be removed, bacause parentNode is null')
+  }
+
+  // The variable x represents the absolute progress of the animation in
+  // the bounds of 0 (beginning of the animation) and 1 (end of animation).
+  private easeInOutQuad(progress: number): number {
+    return progress < 0.5
+      ? 2 * Math.pow(progress, 2)
+      : 1 - Math.pow(-2 * progress + 2, 2) / 2
+  }
+
+  public onNext(): void {
+    this.selectItem(Direction.BACKWARDS)
+  }
+
+  private onPrivous(): void {
+    this.selectItem(Direction.FORWARD)
   }
 }
 </script>
