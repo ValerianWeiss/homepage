@@ -5,9 +5,10 @@
       :artwork="activeArtwork">
     </protfolio-item>
     <item-selector
-      :activeItem="this.activeItem"
-      :items="this.selectableItems"
-      :displayItemCount="5">
+      :activeItem="this.activeArtwork"
+      :items="this.artworks"
+      :displayItemCount="5"
+      v-on:updateActiveItem="onUpdateActiveItem">
     </item-selector>
   </div>
 </template>
@@ -19,7 +20,6 @@ import ProtfolioItem from '@/components/PortfolioItem.vue'
 import ItemSelector from '@/components/ItemSelector.vue'
 import artworks from '@/misc/artworks'
 import Artwork from '@/misc/Artwork'
-import SelectableItem from '../misc/SelectableItem'
 
 @Component({
   name: 'protfolio',
@@ -31,36 +31,19 @@ export default class Portfolio extends Vue {
 
   public constructor() {
     super()
-    this.artworks = artworks
-    this.activeArtwork = this.artworks[0]
+    this.artworks = this.sortArtworksForSelector(artworks)
+    this.activeArtwork = artworks[0]
   }
 
-  private sortArtworksForSelector(): Artwork[] {
-    let middleIndex = Math.floor(this.artworks.length / 2) + 1
-    let suffix = this.artworks.slice(middleIndex)
-    let prefix = this.artworks.slice(0, middleIndex)
+  private sortArtworksForSelector(artworks: Artwork[]): Artwork[] {
+    let middleIndex = Math.floor(artworks.length / 2) + 1
+    let suffix = artworks.slice(middleIndex)
+    let prefix = artworks.slice(0, middleIndex)
     return suffix.concat(prefix)
   }
 
-  private get activeItem(): SelectableItem {
-    return new SelectableItem(
-      this.activeArtwork.previewImgPath,
-      this.activeArtwork.title,
-      this.activeArtwork.previewImgUrl)
-  }
-
-  private get selectableItems(): SelectableItem[] {
-    let items: SelectableItem[] = []
-    let sortedArtworks = this.sortArtworksForSelector()
-
-    sortedArtworks.forEach(artwork => {
-      let selectableItem = new SelectableItem(
-        artwork.previewImgPath,
-        artwork.title,
-        artwork.previewImgUrl)
-      items.push(selectableItem)
-    })
-    return items
+  public onUpdateActiveItem(artwork: Artwork): void {
+    this.activeArtwork = artwork
   }
 }
 </script>

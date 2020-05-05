@@ -18,7 +18,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { Component, Prop } from 'vue-property-decorator'
+import { Component, Prop, Emit } from 'vue-property-decorator'
 import SelectableItem from '@/misc/SelectableItem'
 import { throwVariableIsUndefinedError } from '@/misc/errors'
 
@@ -319,10 +319,29 @@ export default class ItemSelector extends Vue {
 
   public onNext(): void {
     this.selectItem(Direction.BACKWARDS)
+    this.updateActiveArtwork(Direction.BACKWARDS)
   }
 
   private onPrivous(): void {
     this.selectItem(Direction.FORWARD)
+    this.updateActiveArtwork(Direction.FORWARD)
+  }
+
+  @Emit('updateActiveItem')
+  public updateActiveArtwork(direction: Direction): SelectableItem {
+    let step = direction === Direction.FORWARD ? -1 : 1
+    let activeItemIndex = this.items.indexOf(this.activeItem)
+    let newActiveItemIndex
+
+    if (activeItemIndex + step < 0) {
+      newActiveItemIndex = this.items.length - 1
+    } else if (activeItemIndex + step >= this.items.length) {
+      newActiveItemIndex = 0
+    } else {
+      newActiveItemIndex = activeItemIndex + step
+    }
+
+    return this.items[newActiveItemIndex]
   }
 }
 </script>
