@@ -57,10 +57,13 @@ export default class ItemSelector extends Vue {
   private readonly animationDuration: number = 500
   private readonly imageWrapperSize: number = 100
 
+  private leftArrowKeyPressed: boolean = false
+  private rightArrowKeyPressed: boolean = false
+
   private mounted(): void {
     this.checkIfPropsAreValid()
     this.initContentArea()
-    this.isContentAreaInizialized = true
+    this.addArrowKeyEventListeners()
   }
 
   private checkIfPropsAreValid(): void {
@@ -69,6 +72,29 @@ export default class ItemSelector extends Vue {
     } else if (this.displayItemCount > this.items.length) {
       throw new Error('There are not enough items to display.')
     }
+  }
+
+  private addArrowKeyEventListeners(): void {
+    window.addEventListener('keydown', event => {
+      if (event.key === 'ArrowRight') {
+        if (!this.rightArrowKeyPressed) {
+          this.rightArrowKeyPressed = true
+          this.onNext()
+        }
+      }
+
+      if (event.key === 'ArrowLeft') {
+        if (!this.leftArrowKeyPressed) {
+          this.leftArrowKeyPressed = true
+          this.onPrivous()
+        }
+      }
+    })
+
+    window.addEventListener('keyup', event => {
+      if (event.key === 'ArrowRight') this.rightArrowKeyPressed = false
+      if (event.key === 'ArrowLeft') this.leftArrowKeyPressed = false
+    })
   }
 
   private initContentArea(): void {
@@ -84,6 +110,7 @@ export default class ItemSelector extends Vue {
       let imageWrapper = this.createImageWrapper(Side.END, this.items[itemIndex])
       this.imageWrappers.push(imageWrapper)
     }
+    this.isContentAreaInizialized = true
   }
 
   private createImageWrapper(side: Side, item: SelectableItem): ImageWrapper {
