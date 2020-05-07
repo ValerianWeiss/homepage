@@ -304,9 +304,11 @@ export default class ItemSelector extends Vue {
   }
 
   private removeDomElement(element: HTMLElement) {
-    element.parentNode != null
-      ? element.parentNode.removeChild(element)
-      : console.warn('removeDomElement failed. Element could not be removed, bacause parentNode is null')
+    if (element.parentNode != null) {
+      element.parentNode.removeChild(element)
+    } else {
+      throw new Error('removeDomElement failed. Element could not be removed, bacause parentNode is null')
+    }
   }
 
   // The variable x represents the absolute progress of the animation in
