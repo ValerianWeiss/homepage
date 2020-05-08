@@ -10,30 +10,68 @@
         alt="artwork image"
       >
     </div>
-    <div class="text-container">
-      <h2 class="text small-heading">How it was done</h2>
-      <p class=text>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ut tincidunt quam. Morbi volutpat metus vel risus tincidunt hendrerit. Nulla facilisi. In hac habitasse platea dictumst. Suspendisse sagittis, sem id feugiat hendrerit, sapien velit bibendum tellus, nec scelerisque lorem nisi id magna. In vel tellus ultrices elit faucibus ultricies. Etiam hendrerit ullamcorper orci, sit amet ultrices enim cursus quis.
-        Nulla facilisi. Donec euismod at massa non lacinia. Donec in fringilla augue, vel vulputate mi. Praesent eget ipsum eget est condimentum vestibulum. Nulla et maximus mauris. Donec facilisis facilisis diam, sed malesuada erat eleifend quis. In mattis id nisi ac rutrum. Curabitur porta nibh quam, in maximus turpis mattis vel. Morbi in tempor mi, vitae blandit sapien. Aliquam erat volutpat. Quisque facilisis odio massa, eget rutrum est rhoncus id. Vestibulum vulputate magna non iaculis pulvinar. Quisque tempor porttitor dignissim. Integer faucibus maximus ex at tincidunt. Duis metus felis, sollicitudin eget elementum nec, pulvinar sagittis arcu. Nulla vestibulum facilisis erat, nec finibus mi lobortis mollis.
-      </p>
-      <h2 class="text small-heading">Description</h2>
-      <p class=text>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque ut tincidunt quam. Morbi volutpat metus vel risus tincidunt hendrerit. Nulla facilisi. In hac habitasse platea dictumst. Suspendisse sagittis, sem id feugiat hendrerit, sapien velit bibendum tellus, nec scelerisque lorem nisi id magna. In vel tellus ultrices elit faucibus ultricies. Etiam hendrerit ullamcorper orci, sit amet ultrices enim cursus quis.
-        Nulla facilisi. Donec euismod at massa non lacinia. Donec in fringilla augue, vel vulputate mi. Praesent eget ipsum eget est condimentum vestibulum. Nulla et maximus mauris. Donec facilisis facilisis diam, sed malesuada erat eleifend quis. In mattis id nisi ac rutrum. Curabitur porta nibh quam, in maximus turpis mattis vel. Morbi in tempor mi, vitae blandit sapien. Aliquam erat volutpat. Quisque facilisis odio massa, eget rutrum est rhoncus id. Vestibulum vulputate magna non iaculis pulvinar. Quisque tempor porttitor dignissim. Integer faucibus maximus ex at tincidunt. Duis metus felis, sollicitudin eget elementum nec, pulvinar sagittis arcu. Nulla vestibulum facilisis erat, nec finibus mi lobortis mollis.
-      </p>
-    </div>
+    <div class="text-container" v-html="this.descriptionText"></div>
   </div>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { Component, Prop } from 'vue-property-decorator'
+import { Component, Prop, Watch } from 'vue-property-decorator'
 import Artwork from '@/misc/Artwork'
+import { Marked } from '@ts-stack/markdown'
+import AssetService from '@/services/AssetService'
+
+interface DescriptionTextCacheItem {
+  artworkTitle: string,
+  descriptionText: string
+}
 
 @Component({ name: 'protfolio-item' })
 export default class PortfolioItem extends Vue {
   @Prop()
   public artwork: Artwork
+
+  private descriptionText: string = ''
+  private descriptionTextCache: DescriptionTextCacheItem[] = []
+
+  private mounted(): void {
+    this.updateDescriptionText(this.artwork)
+  }
+
+  private updateDescriptionText(artwork: Artwork) {
+    let descriptionTextCacheItem = this.descriptionTextCache.find(item => {
+      return item.artworkTitle === artwork.title
+    })
+
+    if (descriptionTextCacheItem) {
+      this.insertDescriptionText(descriptionTextCacheItem.descriptionText)
+    } else {
+      this.getDescriptionText(artwork).then(descriptionText => {
+        this.insertDescriptionText(descriptionText)
+      })
+    }
+  }
+
+  private getDescriptionText(artwork: Artwork): Promise<string> {
+    return AssetService.getArtworkDescriptionText(artwork).then(res => {
+      let descriptionText = Marked.parse(res.data)
+      this.descriptionTextCache.push({
+        artworkTitle: artwork.title,
+        descriptionText: descriptionText
+      })
+
+      return descriptionText
+    })
+  }
+
+  private insertDescriptionText(descriptionText: string): void {
+    this.descriptionText = descriptionText
+  }
+
+  @Watch('artwork')
+  private onArtworkChange(newArtwork: Artwork, oldArtwork: Artwork): void {
+    this.updateDescriptionText(newArtwork)
+  }
 }
 </script>
 
