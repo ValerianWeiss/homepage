@@ -53,12 +53,16 @@ export default class ItemSelector extends Vue {
   @Prop()
   public activeItem: SelectableItem
 
+  @Prop()
+  public readonly animationDuration: number
+
+  @Prop()
+  private readonly imageWrapperSize: number
+
   private imageWrappers: ImageWrapper[] = []
   private isContentAreaInizialized: boolean = false
   private animationQueue: Promise<void>[] = []
   private readonly contentAreaRef: string = 'content-area'
-  private readonly animationDuration: number = 500
-  private readonly imageWrapperSize: number = 100
 
   private leftArrowKeyPressed: boolean = false
   private rightArrowKeyPressed: boolean = false

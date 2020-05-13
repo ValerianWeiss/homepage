@@ -38,10 +38,12 @@ export default class PortfolioItem extends Vue {
   @Prop()
   public artwork: Artwork
 
+  @Prop()
+  public readonly fadeInOutDuration: number
+
   private activeArtwork: Artwork
   private descriptionText: string = ''
   private descriptionTextCache: DescriptionTextCacheItem[] = []
-  private fadeInOutMaxDuration: number = 250
   private portfolioItemRef: string = 'portfolio-item'
   private fadeAnimationQueue: Promise<void>[] = []
 
@@ -90,13 +92,13 @@ export default class PortfolioItem extends Vue {
       let animationInterval = setInterval(() => {
         let ellapsedTime = new Date().getTime() - startTime
 
-        if (ellapsedTime >= this.fadeInOutMaxDuration) {
+        if (ellapsedTime >= this.fadeInOutDuration / 2) {
           portfolioItem.style.opacity = fading === Fading.IN ? '1' : '0'
           clearInterval(animationInterval)
           resolve()
         }
 
-        let progress = ellapsedTime / this.fadeInOutMaxDuration
+        let progress = ellapsedTime / (this.fadeInOutDuration / 2)
         let opacity = fading === Fading.IN ? progress : 1 - progress
         portfolioItem.style.opacity = `${opacity}`
       }, 1000 / 60)

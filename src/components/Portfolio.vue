@@ -2,12 +2,15 @@
   <div class="portfolio">
     <protfolio-item
       class="item"
-      :artwork="activeArtwork">
+      :artwork="activeArtwork"
+      :fadeInOutDuration="500">
     </protfolio-item>
     <item-selector
       :activeItem="this.activeArtwork"
       :items="this.artworks"
       :displayItemCount="5"
+      :animationDuration="500"
+      :imageWrapperSize="100"
       v-on:updateActiveItem="onUpdateActiveItem">
     </item-selector>
   </div>
