@@ -5,7 +5,10 @@
         <span class="next-btn">&#8810;</span>
       </div>
     </div>
-    <div id="content-area" class="content-area float-left" :ref="this.contentAreaRef">
+    <div
+      id="content-area"
+      class="content-area float-left"
+      :ref="this.contentAreaRef">
       <div class="active-item-bars"></div>
     </div>
     <div class="navigator-arrow float-right center-flex">
@@ -219,12 +222,11 @@ export default class ItemSelector extends Vue {
           this.imageWrappers.forEach(imageWrapper => {
             let position = imageWrapper.position
             let size = this.calcImageWrapperSize(position, progress, direction)
-
             let leftMargin = direction === Direction.FORWARD
               ? this.calcImageWrapperLeftMargin(position) + distFactor * totalDist - totalDist
               : this.calcImageWrapperLeftMargin(position) + distFactor * totalDist
-            let element = imageWrapper.element
 
+            let element = imageWrapper.element
             element.style.width = `${size}px`
             element.style.height = `${size}px`
             element.style.left = `calc(${leftMargin}% - ${size / 2}px)`
@@ -233,13 +235,14 @@ export default class ItemSelector extends Vue {
           if (progress === 1) {
             direction === Direction.FORWARD ? this.removeLastImageWrapper() : this.removeFirstImageWrapper()
             clearInterval(animationInterval)
-            let animationIndex = this.animationQueue.indexOf(animationPromise)
             resolve()
+            let animationIndex = this.animationQueue.indexOf(animationPromise)
             this.animationQueue.splice(animationIndex, 1)
           }
         }, 1000 / 60)
       })
     })
+
     this.animationQueue.push(animationPromise)
     return animationPromise
   }
