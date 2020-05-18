@@ -36,10 +36,10 @@ enum Fading {
 @Component({ name: 'protfolio-item' })
 export default class PortfolioItem extends Vue {
   @Prop()
-  public artwork: Artwork
+  private readonly artwork: Artwork
 
   @Prop()
-  public readonly fadeInOutDuration: number
+  private readonly fadeInOutDuration: number
 
   private activeArtwork: Artwork
   private descriptionText: string = ''

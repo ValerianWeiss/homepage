@@ -1,17 +1,18 @@
 <template>
   <div class="portfolio">
     <protfolio-item
-      class="item"
-      :artwork="activeArtwork"
+      :artwork="this.activeArtwork"
       :fadeInOutDuration="500">
     </protfolio-item>
     <item-selector
+      class="item-selector"
       :activeItem="this.activeArtwork"
       :items="this.artworks"
       :displayItemCount="5"
       :animationDuration="500"
       :imageWrapperSize="100"
-      v-on:updateActiveItem="onUpdateActiveItem">
+      :orientation="this.orientation"
+      v-on:updateActiveItem="this.onUpdateActiveItem">
     </item-selector>
   </div>
 </template>
@@ -20,22 +21,24 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import ProtfolioItem from '@/components/PortfolioItem.vue'
-import ItemSelector from '@/components/ItemSelector.vue'
+import ItemSelector, { Orientation } from '@/components/ItemSelector.vue'
 import artworks from '@/misc/artworks'
 import Artwork from '@/misc/Artwork'
 
 @Component({
-  name: 'protfolio',
+  name: 'portfolio',
   components: { ProtfolioItem, ItemSelector }
 })
 export default class Portfolio extends Vue {
   private artworks: Artwork[]
   private activeArtwork: Artwork
+  private readonly orientation: Orientation
 
   public constructor() {
     super()
     this.artworks = this.sortArtworksForSelector(artworks)
     this.activeArtwork = artworks[0]
+    this.orientation = Orientation.VERTICAL
   }
 
   private sortArtworksForSelector(artworks: Artwork[]): Artwork[] {
@@ -45,17 +48,17 @@ export default class Portfolio extends Vue {
     return suffix.concat(prefix)
   }
 
-  public onUpdateActiveItem(artwork: Artwork): void {
+  private onUpdateActiveItem(artwork: Artwork): void {
     this.activeArtwork = artwork
   }
 }
 </script>
 
 <style lang="sass" scoped>
-.portfolio
-  height: 100%
-
-.item
-  width: 100%
-  height: 80%
+.item-selector
+  position: fixed
+  width: 150px
+  height: 800px
+  right: 40px
+  top: calc(50% - 400px)
 </style>

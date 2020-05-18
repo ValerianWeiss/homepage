@@ -17,17 +17,11 @@ export default class Navbar extends Vue {}
 </script>
 
 <style lang="sass" scoped>
-.navbar
-  position: relative
-  padding-top: 10px
-  height: 50px
-  width: 100%
-
 .menu
   height: 30px
   width: 40px
   margin-left: 30px
-  padding: 10px 5px 10px 5px
+  padding: 20px 5px 10px 5px
 
 .menu-line
   margin: 0 0 8px 0

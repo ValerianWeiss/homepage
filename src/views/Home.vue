@@ -1,7 +1,7 @@
 <template>
   <div class="home">
-    <loading v-if="this.isLoading"></loading>
-    <portfolio></portfolio>
+    <navbar class="navbar"></navbar>
+    <portfolio class="portfolio"></portfolio>
   </div>
 </template>
 
@@ -26,7 +26,18 @@ export default class Home extends Vue {
 
 <style lang="sass" scoped>
 .home
-  height: calc(100vh - 60px)
-  margin: 0
-  padding: 0 10% 0 10%
+  display: grid
+  grid-template-rows: [line-start] 60px [line1] calc( 100vh - 60px ) [line-end]
+
+.navbar
+  grid-column-start: 1
+  grid-column-end: 1
+  grid-row-start: 1
+  grid-row-end: 1
+
+.portfolio
+  grid-column-start: 1
+  grid-column-end: 1
+  grid-row-start: 2
+  grid-row-end: 2
 </style>

@@ -1,6 +1,5 @@
 <template>
   <div class="app">
-    <navbar></navbar>
     <home></home>
   </div>
 </template>
@@ -9,8 +8,7 @@
 import Vue from 'vue'
 import Component from 'vue-class-component'
 import Home from '@/views/Home.vue'
-import Navbar from '@/components/Navbar.vue'
 
-@Component({ components: { Home, Navbar } })
+@Component({ components: { Home } })
 export default class App extends Vue {}
 </script>

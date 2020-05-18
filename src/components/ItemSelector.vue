@@ -1,19 +1,18 @@
 <template>
-  <div class="item-selector">
-    <div class="navigator-arrow float-left center-flex">
+  <div :class="`item-selector ${this.orientationClass}`">
+    <div class="navigator-arrow center-flex">
       <div class="circle-btn center-flex" @click="this.onPrivous">
-        <span class="next-btn">&#8810;</span>
+        <span class="next-icon">&#8810;</span>
       </div>
     </div>
     <div
-      id="content-area"
-      class="content-area float-left"
+      class="content-area"
       :ref="this.contentAreaRef">
       <div class="active-item-bars"></div>
     </div>
-    <div class="navigator-arrow float-right center-flex">
+    <div class="navigator-arrow center-flex">
       <div class="circle-btn center-flex" @click="this.onNext">
-        <span class="next-btn">&#x226B;</span>
+        <span class="next-icon">&#x226B;</span>
       </div>
     </div>
   </div>
@@ -42,35 +41,56 @@ enum Side {
   END
 }
 
+enum Orientation {
+  VERTICAL,
+  HORIZONTAL
+}
+
 @Component({ name: 'item-selector' })
 export default class ItemSelector extends Vue {
   @Prop()
-  public displayItemCount: number
+  private readonly displayItemCount: number
 
   @Prop()
-  public items: SelectableItem[]
+  private readonly items: SelectableItem[]
 
   @Prop()
-  public activeItem: SelectableItem
+  private readonly activeItem: SelectableItem
 
   @Prop()
-  public readonly animationDuration: number
+  private readonly animationDuration: number
 
   @Prop()
   private readonly imageWrapperSize: number
 
+  @Prop()
+  private readonly orientation: Orientation
+
   private imageWrappers: ImageWrapper[] = []
-  private isContentAreaInizialized: boolean = false
   private animationQueue: Promise<void>[] = []
   private readonly contentAreaRef: string = 'content-area'
-
-  private leftArrowKeyPressed: boolean = false
-  private rightArrowKeyPressed: boolean = false
+  private isContentAreaInizialized: boolean = false
+  private previousKeyPressed: boolean = false
+  private nextKeyPressed: boolean = false
 
   private mounted(): void {
     this.checkIfPropsAreValid()
     this.initContentArea()
     this.addArrowKeyEventListeners()
+  }
+
+  private get orientationClass(): string {
+    return this.orientation === Orientation.HORIZONTAL
+      ? 'horizontal-item-selector'
+      : 'vertical-item-selector'
+  }
+
+  private get nextKey(): string {
+    return this.orientation === Orientation.VERTICAL ? 'ArrowUp' : 'ArrowRight'
+  }
+
+  private get previousKey(): string {
+    return this.orientation === Orientation.VERTICAL ? 'ArrowDown' : 'ArrowLeft'
   }
 
   private checkIfPropsAreValid(): void {
@@ -83,24 +103,24 @@ export default class ItemSelector extends Vue {
 
   private addArrowKeyEventListeners(): void {
     window.addEventListener('keydown', event => {
-      if (event.key === 'ArrowRight') {
-        if (!this.rightArrowKeyPressed) {
-          this.rightArrowKeyPressed = true
+      if (event.key === this.nextKey) {
+        if (!this.nextKeyPressed) {
+          this.nextKeyPressed = true
           this.onNext()
         }
       }
 
-      if (event.key === 'ArrowLeft') {
-        if (!this.leftArrowKeyPressed) {
-          this.leftArrowKeyPressed = true
+      if (event.key === this.previousKey) {
+        if (!this.previousKeyPressed) {
+          this.previousKeyPressed = true
           this.onPrivous()
         }
       }
     })
 
     window.addEventListener('keyup', event => {
-      if (event.key === 'ArrowRight') this.rightArrowKeyPressed = false
-      if (event.key === 'ArrowLeft') this.leftArrowKeyPressed = false
+      if (event.key === this.nextKey) this.nextKeyPressed = false
+      if (event.key === this.previousKey) this.previousKeyPressed = false
     })
   }
 
@@ -150,15 +170,25 @@ export default class ItemSelector extends Vue {
   }
 
   private setStylingForImageWrapper(element: any, position: number): void {
-    let leftMargin = this.calcImageWrapperLeftMargin(position)
     let size = this.calcImageWrapperSize(position, this.imageWrapperSize)
+    this.setMarginsForImageWrapper(element, position, size)
 
     element.style.position = 'absolute'
     element.style.width = `${size}px`
     element.style.height = `${size}px`
     element.style.backgroundColor = '#000'
     element.style.float = 'left'
-    element.style.left = `calc(${leftMargin}% - ${size / 2}px)`
+  }
+
+  private setMarginsForImageWrapper(element: any, position: number, size: number): void {
+    let margin = this.calcImageWrapperMargin(position)
+
+    if (this.orientation === Orientation.HORIZONTAL) {
+      element.style.left = `calc(${margin}% - ${size / 2}px)`
+    } else {
+      element.style.top = `calc(${margin}% - ${size / 2}px)`
+      element.style.left = `calc(50% - ${size / 2}px)`
+    }
   }
 
   private setStylingForImage(element: any, index: number, item: SelectableItem): void {
@@ -168,7 +198,7 @@ export default class ItemSelector extends Vue {
     element.style.height = '100%'
   }
 
-  private calcImageWrapperLeftMargin(position: number): number {
+  private calcImageWrapperMargin(position: number): number {
     return 100 / (this.displayItemCount + 1) * (position + 1)
   }
 
@@ -221,19 +251,10 @@ export default class ItemSelector extends Vue {
           let ellapsedTime = new Date().getTime() - startTime
           let progress = ellapsedTime < this.animationDuration ? ellapsedTime / this.animationDuration : 1
           let distFactor = this.easeInOutQuad(progress)
-          let totalDist = directionFactor * this.calcImageWrapperLeftMargin(0)
+          let totalDist = directionFactor * this.calcImageWrapperMargin(0)
 
           this.imageWrappers.forEach(imageWrapper => {
-            let position = imageWrapper.position
-            let size = this.calcImageWrapperSize(position, progress, direction)
-            let leftMargin = direction === Direction.FORWARD
-              ? this.calcImageWrapperLeftMargin(position) + distFactor * totalDist - totalDist
-              : this.calcImageWrapperLeftMargin(position) + distFactor * totalDist
-
-            let element = imageWrapper.element
-            element.style.width = `${size}px`
-            element.style.height = `${size}px`
-            element.style.left = `calc(${leftMargin}% - ${size / 2}px)`
+            this.updateImageWrapperStyling(imageWrapper, progress, direction, distFactor, totalDist)
           })
 
           if (progress === 1) {
@@ -253,6 +274,28 @@ export default class ItemSelector extends Vue {
 
   private getDirectionFactor(direction: Direction): number {
     return direction === Direction.FORWARD ? 1 : -1
+  }
+
+  private updateImageWrapperStyling(imageWrapper: ImageWrapper, progress: number, direction: Direction, distFactor: number, totalDist: number): void {
+    let position = imageWrapper.position
+    let size = this.calcImageWrapperSize(position, progress, direction)
+    let margin = direction === Direction.FORWARD
+      ? this.calcImageWrapperMargin(position) + distFactor * totalDist - totalDist
+      : this.calcImageWrapperMargin(position) + distFactor * totalDist
+
+    this.updateImageWrapperMargins(imageWrapper, size, margin)
+
+    imageWrapper.element.style.width = `${size}px`
+    imageWrapper.element.style.height = `${size}px`
+  }
+
+  private updateImageWrapperMargins(imageWrapper: ImageWrapper, size: number, margin: number): void {
+    if (this.orientation === Orientation.HORIZONTAL) {
+      imageWrapper.element.style.left = `calc(${margin}% - ${size / 2}px)`
+    } else {
+      imageWrapper.element.style.top = `calc(${margin}% - ${size / 2}px)`
+      imageWrapper.element.style.left = `calc(50% - ${size / 2}px)`
+    }
   }
 
   private addNewImageWrapper(direction: Direction) {
@@ -327,18 +370,25 @@ export default class ItemSelector extends Vue {
   }
 
   public onNext(): void {
-    this.selectItem(Direction.BACKWARDS)
+    let direction = this.orientation === Orientation.VERTICAL
+      ? Direction.BACKWARDS : Direction.FORWARD
+
+    this.selectItem(direction)
     this.updateActiveArtwork(Direction.BACKWARDS)
   }
 
   private onPrivous(): void {
-    this.selectItem(Direction.FORWARD)
+    let direction = this.orientation === Orientation.VERTICAL
+      ? Direction.FORWARD : Direction.BACKWARDS
+
+    this.selectItem(direction)
     this.updateActiveArtwork(Direction.FORWARD)
   }
 
   @Emit('updateActiveItem')
   public updateActiveArtwork(direction: Direction): SelectableItem {
-    let step = direction === Direction.FORWARD ? -1 : 1
+    let step = direction === Direction.FORWARD ? 1 : -1
+    if (this.orientation === Orientation.VERTICAL) step *= -1
     let activeItemIndex = this.items.indexOf(this.activeItem)
     let newActiveItemIndex
 
@@ -353,17 +403,46 @@ export default class ItemSelector extends Vue {
     return this.items[newActiveItemIndex]
   }
 }
+
+export {
+  Orientation
+}
 </script>
 
 <style lang="sass" scoped>
 .item-selector
-  width: 100%
-  height: 100px
-  margin-top: 40px
 
-.navigator-arrow
-  width: 5%
-  height: 100%
+.horizontal-item-selector
+  display: grid
+  grid-template-columns: [line-start] 50px [line1] auto [line2] 50px [line-end]
+  justify-items: center
+
+  .active-item-bars
+    width: 100px
+    height: 108px
+    border-left: 0
+    border-right: 0
+    left: calc(50% - 49px)
+
+.vertical-item-selector
+  display: grid
+  grid-template-rows: [line-start] 50px [line1] auto [line2] 50px [line-end]
+  justify-items: center
+
+  .active-item-bars
+    width: 108px
+    height: 100px
+    border-top: 0
+    border-bottom: 0
+    left: calc(50% - 57px)
+
+  .circle-btn
+    transform: rotate(90deg)
+
+.active-item-bars
+  position: absolute
+  border-style: solid
+  border-color: rgba(100, 150, 255, 1)
 
 .circle-btn
   height: 30px
@@ -374,23 +453,9 @@ export default class ItemSelector extends Vue {
 .circle-btn:hover
   background-color: #BBB
 
-.next-btn
-  margin-top: 2px
-
-.active-item-bars
-  position: absolute
-  top: -7px
-  width: 100px
-  height: 108px
-  border-style: solid
-  border-left: 0
-  border-right: 0
-  border-color: rgba(100, 150, 255, 1)
-  left: calc(50% - 49px)
-
 .content-area
   position: relative
-  width: 90%
+  width: 100%
   height: 100%
   display: flex
   align-items: center

@@ -20,10 +20,10 @@ import {
 
 @Component({ name: 'crystal' })
 export default class Crystal extends Vue {
-  private renderer: WebGLRenderer|null
-  private scene: Scene|null
-  private camera: PerspectiveCamera|null
-  private crystal: Mesh|null
+  private renderer: WebGLRenderer | null
+  private scene: Scene | null
+  private camera: PerspectiveCamera | null
+  private crystal: Mesh | null
 
   public constructor() {
     super()
