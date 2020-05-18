@@ -23,6 +23,7 @@ import Vue from 'vue'
 import { Component, Prop, Emit } from 'vue-property-decorator'
 import SelectableItem from '@/misc/SelectableItem'
 import { throwVariableIsUndefinedError } from '@/misc/errors'
+import { getRefElement } from '@/misc/helpers'
 
 interface ImageWrapper {
   element: HTMLDivElement,
@@ -68,10 +69,10 @@ export default class ItemSelector extends Vue {
 
   private imageWrappers: ImageWrapper[] = []
   private animationQueue: Promise<void>[] = []
-  private readonly contentAreaRef: string = 'content-area'
   private isContentAreaInizialized: boolean = false
   private previousKeyPressed: boolean = false
   private nextKeyPressed: boolean = false
+  private readonly contentAreaRef: string = 'content-area'
 
   private mounted(): void {
     this.checkIfPropsAreValid()
@@ -147,7 +148,7 @@ export default class ItemSelector extends Vue {
     this.setStylingForImageWrapper(element, position)
     this.setStylingForImage(image, position, item)
     element.appendChild(image)
-    this.getContentArea().appendChild(element)
+    getRefElement(this, this.contentAreaRef).appendChild(element)
 
     return {
       element,
@@ -163,10 +164,6 @@ export default class ItemSelector extends Vue {
       return 0
     }
     return this.imageWrappers.length
-  }
-
-  private getContentArea(): any {
-    return this.$refs[this.contentAreaRef]
   }
 
   private setStylingForImageWrapper(element: any, position: number): void {
@@ -410,8 +407,6 @@ export {
 </script>
 
 <style lang="sass" scoped>
-.item-selector
-
 .horizontal-item-selector
   display: grid
   grid-template-columns: [line-start] 50px [line1] auto [line2] 50px [line-end]

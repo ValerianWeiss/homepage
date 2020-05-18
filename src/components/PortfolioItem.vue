@@ -1,17 +1,15 @@
 <template>
   <div class="portfolio-item" :ref="this.portfolioItemRef">
-    <div class="heading">
-      <h1>{{this.activeArtwork.title}}</h1>
+    <div class="artwork-title">
+      <h1 :ref="this.artworkTitleTextRef" >
+        {{this.activeArtwork.title}}
+      </h1>
     </div>
-    <div class="image-container float-left">
+    <div class="image-container">
       <img
         class="image width-height-100"
         :src="this.activeArtwork.previewImgUrl"
         alt="artwork image">
-    </div>
-    <div
-      class="text-container"
-      v-html="this.descriptionText">
     </div>
   </div>
 </template>
@@ -22,6 +20,7 @@ import { Component, Prop, Watch } from 'vue-property-decorator'
 import Artwork from '@/misc/Artwork'
 import { Marked } from '@ts-stack/markdown'
 import AssetService from '@/services/AssetService'
+import { getRefElement } from '../misc/helpers'
 
 interface DescriptionTextCacheItem {
   artworkTitle: string,
@@ -44,8 +43,9 @@ export default class PortfolioItem extends Vue {
   private activeArtwork: Artwork
   private descriptionText: string = ''
   private descriptionTextCache: DescriptionTextCacheItem[] = []
-  private portfolioItemRef: string = 'portfolio-item'
   private fadeAnimationQueue: Promise<void>[] = []
+  private readonly portfolioItemRef: string = 'portfolio-item'
+  private readonly artworkTitleTextRef: string = 'artwork-title'
 
   public constructor() {
     super()
@@ -54,6 +54,8 @@ export default class PortfolioItem extends Vue {
 
   private mounted(): void {
     this.updateDescriptionText(this.artwork)
+    this.setArtworkTitleTextColor(this.artwork.contrastColor)
+    console.log(this.artwork.contrastColor)
     this.startFadeArtworkAnimation(Fading.IN)
   }
 
@@ -83,10 +85,15 @@ export default class PortfolioItem extends Vue {
     })
   }
 
+  private setArtworkTitleTextColor(textColor: string): void {
+    let element = getRefElement(this, this.artworkTitleTextRef)
+    element.style.color = textColor
+  }
+
   private startFadeArtworkAnimation(fading: Fading): Promise<void> {
     return new Promise<void>(resolve => {
       if (fading === Fading.IN) this.activeArtwork = this.artwork
-      let portfolioItem = this.getPortfolioItem()
+      let portfolioItem = getRefElement(this, this.portfolioItemRef)
       let startTime = new Date().getTime()
 
       let animationInterval = setInterval(() => {
@@ -122,10 +129,6 @@ export default class PortfolioItem extends Vue {
     return animationPromise
   }
 
-  private getPortfolioItem(): any {
-    return this.$refs[this.portfolioItemRef]
-  }
-
   private insertDescriptionText(descriptionText: string): void {
     this.descriptionText = descriptionText
   }
@@ -143,17 +146,23 @@ export default class PortfolioItem extends Vue {
   height: 100%
   opacity: 0
 
-.heading
+.artwork-title
+  position: absolute
   height: 80px
-  margin-bottom: 30px
+  transform: rotate(270deg)
+  top: 0
+  bottom: 0
 
 .image-container
-  width: 40%
-  height: calc(100% - 110px)
+  position: absolute
+  top: 0
+  left: 0
+  width: 100vw
+  height: 100vh
+  z-index: -1
 
 .image
-  object-fit: contain
-  object-position: 0 0
+  object-fit: cover
 
 .text-container
   height: calc(100% - 110px)
