@@ -1,7 +1,9 @@
 <template>
   <div class="portfolio-item" :ref="this.portfolioItemRef">
-    <div class="artwork-title">
-      <h1 :ref="this.artworkTitleTextRef" >
+    <div class="artwork-title-wrapper">
+      <h1
+      class="artwork-title"
+      :ref="this.artworkTitleTextRef" >
         {{this.activeArtwork.title}}
       </h1>
     </div>
@@ -40,22 +42,16 @@ export default class PortfolioItem extends Vue {
   @Prop()
   private readonly fadeInOutDuration: number
 
-  private activeArtwork: Artwork
+  private activeArtwork: Artwork = this.artwork
   private descriptionText: string = ''
   private descriptionTextCache: DescriptionTextCacheItem[] = []
   private fadeAnimationQueue: Promise<void>[] = []
   private readonly portfolioItemRef: string = 'portfolio-item'
   private readonly artworkTitleTextRef: string = 'artwork-title'
 
-  public constructor() {
-    super()
-    this.activeArtwork = this.artwork
-  }
-
   private mounted(): void {
     this.updateDescriptionText(this.artwork)
     this.setArtworkTitleTextColor(this.artwork.contrastColor)
-    console.log(this.artwork.contrastColor)
     this.startFadeArtworkAnimation(Fading.IN)
   }
 
@@ -142,16 +138,14 @@ export default class PortfolioItem extends Vue {
 </script>
 
 <style lang="sass" scoped>
-.portfolio-item
-  height: 100%
-  opacity: 0
+.artwork-title-wrapper
+  position: absolute
+  width: 800px
+  left: -330px
+  bottom: 400px
 
 .artwork-title
-  position: absolute
-  height: 80px
   transform: rotate(270deg)
-  top: 0
-  bottom: 0
 
 .image-container
   position: absolute
@@ -163,16 +157,4 @@ export default class PortfolioItem extends Vue {
 
 .image
   object-fit: cover
-
-.text-container
-  height: calc(100% - 110px)
-  width: 60%
-  float: left
-  overflow: auto auto
-
-.text
-  margin: 0 25px 15px 25px
-
-.small-heading
-  margin: 0px 25px 5px 25px
 </style>
