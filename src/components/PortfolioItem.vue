@@ -10,8 +10,7 @@
     <div class="image-container">
       <img
         class="image width-height-100"
-        :src="this.activeArtwork.previewImgUrl"
-        alt="artwork image">
+        :src="this.imageUrl">
     </div>
   </div>
 </template>
@@ -55,6 +54,10 @@ export default class PortfolioItem extends Vue {
     this.startFadeArtworkAnimation(Fading.IN)
   }
 
+  private get imageUrl(): string {
+    return this.artwork.getImageState().url
+  }
+
   private updateDescriptionText(artwork: Artwork) {
     let descriptionTextCacheItem = this.descriptionTextCache.find(item => {
       return item.artworkTitle === artwork.title
@@ -69,9 +72,14 @@ export default class PortfolioItem extends Vue {
     }
   }
 
+  private insertDescriptionText(descriptionText: string): void {
+    this.descriptionText = descriptionText
+  }
+
   private getDescriptionText(artwork: Artwork): Promise<string> {
     return AssetService.getArtworkDescriptionText(artwork).then(res => {
       let descriptionText = Marked.parse(res.data)
+
       this.descriptionTextCache.push({
         artworkTitle: artwork.title,
         descriptionText: descriptionText
@@ -123,10 +131,6 @@ export default class PortfolioItem extends Vue {
 
     this.fadeAnimationQueue.push(animationPromise)
     return animationPromise
-  }
-
-  private insertDescriptionText(descriptionText: string): void {
-    this.descriptionText = descriptionText
   }
 
   @Watch('artwork')
