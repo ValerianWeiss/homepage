@@ -24,7 +24,6 @@
 import Vue from 'vue'
 import SelectableItem from '@/misc/SelectableItem'
 import { Component, Prop, Emit } from 'vue-property-decorator'
-import { throwVariableIsUndefinedError } from '@/misc/errors'
 import { getRefElement } from '@/misc/helpers'
 
 interface ImageWrapper {
