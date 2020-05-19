@@ -22,8 +22,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { Component, Prop, Emit } from 'vue-property-decorator'
 import SelectableItem from '@/misc/SelectableItem'
+import { Component, Prop, Emit } from 'vue-property-decorator'
 import { throwVariableIsUndefinedError } from '@/misc/errors'
 import { getRefElement } from '@/misc/helpers'
 
@@ -336,9 +336,11 @@ export default class ItemSelector extends Vue {
   }
 
   private removeImageWrapperFromDom(imageWrapper: ImageWrapper | undefined): void {
-    imageWrapper === undefined
-      ? throwVariableIsUndefinedError()
-      : this.removeDomElement(imageWrapper.element)
+    if (imageWrapper === undefined) {
+      throw new Error('Variable is not expected to be undefined')
+    }
+
+    this.removeDomElement(imageWrapper.element)
   }
 
   private incrementImageWrapperPositions(): void {

@@ -21,6 +21,13 @@
       v-on:nextImage="this.onNextImage"
       v-on:previousImage="this.onPreviousImage">
     </item-switcher>
+    <div class="scroll-down-info center-flex">
+      <svg class="scroll-down-icon">
+        <polygon class="arrow-top" points="37.6,27.9 1.8,1.3 3.3,0 37.6,25.3 71.9,0 73.7,1.3 "/>
+        <polygon class="arrow-middle" points="37.6,45.8 0.8,18.7 4.4,16.4 37.6,41.2 71.2,16.4 74.5,18.7 "/>
+        <polygon class="arrow-bottom" points="37.6,64 0,36.1 5.1,32.8 37.6,56.8 70.4,32.8 75.5,36.1 "/>
+      </svg>
+    </div>
   </div>
 </template>
 
@@ -32,7 +39,6 @@ import ItemSelector, { Orientation } from '@/components/ItemSelector.vue'
 import ItemSwitcher from '@/components/ItemSwitcher.vue'
 import artworks from '@/misc/artworks'
 import Artwork from '@/misc/Artwork'
-import { throwVariableIsUndefinedError } from '@/misc/errors'
 
 @Component({
   name: 'portfolio',
@@ -100,6 +106,37 @@ export default class Portfolio extends Vue {
   position: fixed
   width: 500px
   height: 40px
-  bottom: 50px
+  bottom: 75px
   left: calc(50% - 250px)
+
+.scroll-down-info
+  position: fixed
+  width: 200px
+  height: 50px
+  bottom: 20px
+  left: calc(50% - 100px)
+
+.scroll-down-icon
+  width: 75px
+  height: 65px
+  transform: scale(0.5)
+
+  &:hover
+    polygon
+      transition: all .2s ease-out
+
+      &.arrow-bottom
+        transform: translateY(-18px)
+
+      &.arrow-top
+        transform: translateY(18px)
+
+polygon
+  transition: all .2s ease-out
+
+  &.arrow-middle
+    opacity: 0.75
+
+  &.arrow-top
+    opacity: 0.5
 </style>
