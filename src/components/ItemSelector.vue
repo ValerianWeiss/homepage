@@ -1,5 +1,7 @@
 <template>
-  <div :class="`item-selector ${this.orientationClass}`">
+  <div
+    :class="`item-selector ${this.orientationClass}`"
+    @mousewheel="this.onScroll">
     <div class="navigator-arrow center-flex">
       <div class="circle-btn center-flex" @click="this.onPrivous">
         <span class="next-icon">&#8810;</span>
@@ -73,6 +75,7 @@ export default class ItemSelector extends Vue {
   private previousKeyPressed: boolean = false
   private nextKeyPressed: boolean = false
   private readonly contentAreaRef: string = 'content-area'
+  private readonly scrollFactor: number = 4 * 100
 
   private mounted(): void {
     this.checkIfPropsAreValid()
@@ -366,7 +369,30 @@ export default class ItemSelector extends Vue {
       : 1 - Math.pow(-2 * progress + 2, 2) / 2
   }
 
-  public onNext(): void {
+  public onScroll(event: any): void {
+    let delta = event.deltaY
+    let itemsToScroll = Math.round(delta / this.scrollFactor)
+
+    if (Math.abs(itemsToScroll) === 0) {
+      if (delta > 0) {
+        itemsToScroll++
+      } else {
+        itemsToScroll--
+      }
+    }
+
+    for (let i = 0; i < Math.abs(itemsToScroll); i++) {
+      if (itemsToScroll > 0) {
+        this.orientation === Orientation.VERTICAL
+          ? this.onPrivous() : this.onNext()
+      } else {
+        this.orientation === Orientation.VERTICAL
+          ? this.onNext() : this.onPrivous()
+      }
+    }
+  }
+
+  private onNext(): void {
     let direction = this.orientation === Orientation.VERTICAL
       ? Direction.BACKWARDS : Direction.FORWARD
 

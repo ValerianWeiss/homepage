@@ -26,5 +26,4 @@ export default class Navbar extends Vue {}
 .menu-line
   margin: 0 0 8px 0
   border-top: 1px solid black
-
 </style>

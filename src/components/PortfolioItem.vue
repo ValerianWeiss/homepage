@@ -55,7 +55,7 @@ export default class PortfolioItem extends Vue {
   }
 
   private get imageUrl(): string {
-    return this.artwork.getImageState().url
+    return this.activeArtwork.getImageState().url
   }
 
   private updateDescriptionText(artwork: Artwork) {
@@ -94,9 +94,12 @@ export default class PortfolioItem extends Vue {
     element.style.color = textColor
   }
 
-  private startFadeArtworkAnimation(fading: Fading): Promise<void> {
+  private startFadeArtworkAnimation(fading: Fading, artwork?: Artwork): Promise<void> {
     return new Promise<void>(resolve => {
-      if (fading === Fading.IN) this.activeArtwork = this.artwork
+      if (fading === Fading.IN && artwork !== undefined) {
+        this.activeArtwork = artwork
+      }
+
       let portfolioItem = getRefElement(this, this.portfolioItemRef)
       let startTime = new Date().getTime()
 
@@ -116,11 +119,11 @@ export default class PortfolioItem extends Vue {
     })
   }
 
-  private fadeArtwork(): Promise<void> {
+  private fadeArtwork(artwork?: Artwork): Promise<void> {
     let animationPromise = new Promise<void>(resolve => {
       Promise.all(this.fadeAnimationQueue).then(() => {
         this.startFadeArtworkAnimation(Fading.OUT).then(() => {
-          this.startFadeArtworkAnimation(Fading.IN).then(() => {
+          this.startFadeArtworkAnimation(Fading.IN, artwork).then(() => {
             resolve()
             let animationIndex = this.fadeAnimationQueue.indexOf(animationPromise)
             this.fadeAnimationQueue.splice(animationIndex, 1)
@@ -136,7 +139,7 @@ export default class PortfolioItem extends Vue {
   @Watch('artwork')
   private onArtworkChange(newArtwork: Artwork, oldArtwork: Artwork): void {
     this.updateDescriptionText(newArtwork)
-    this.fadeArtwork()
+    this.fadeArtwork(newArtwork)
   }
 }
 </script>
